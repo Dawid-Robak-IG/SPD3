@@ -7,5 +7,5 @@
 
 Machine::Machine(const int n) {
     this->n = n;
-    operations.reserve(n);
+    operations.resize(n);
 }

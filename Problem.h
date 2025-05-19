@@ -10,7 +10,7 @@
 class Problem {
     int n; //liczba zadan
     int m; //procesor
-    std::vector<Machine> tasks;
+    std::vector<Machine> machines;
 public:
     std::vector<int> pi;
 
@@ -18,6 +18,8 @@ public:
     void fill_test1();
     void clear();
     void PZ();
+    void NEH();
+    void Johnson();
     int CMax(const std::vector<int> &perm);
 };
 
