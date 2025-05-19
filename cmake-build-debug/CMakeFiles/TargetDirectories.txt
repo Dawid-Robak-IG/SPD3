@@ -1,0 +1,3 @@
+/home/drworms/CLionProjects/spd3/cmake-build-debug/CMakeFiles/spd3.dir
+/home/drworms/CLionProjects/spd3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/drworms/CLionProjects/spd3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
