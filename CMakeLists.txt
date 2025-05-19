@@ -3,4 +3,8 @@ project(spd3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(spd3 main.cpp)
+add_executable(spd3 main.cpp
+        Machine.cpp
+        Machine.h
+        Problem.cpp
+        Problem.h)
