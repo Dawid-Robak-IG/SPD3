@@ -3,24 +3,24 @@
 
 #include "Problem.h"
 
-const int tests_nr=16;
+const int tests_nr=1;
 Instance instances[tests_nr] = {
-    {2,10,10,1},
-    {2,10,20,10},
-    {2,20,20,10},
-    {2,20,100,50},
-    {2,30,10,1},
-    {2,30,100,50},
-    {2,50,10,1},
-    {2,50,100,50},
-    {2,100,100,50},
-    {3,10,10,1},
-    {5,10,10,1},
-    {10,10,10,1},
-    {3,40,70,30},
-    {5,40,70,30},
-    {10,40,70,30},
-    {30,40,70,30},
+    {2,10,10,1}
+    // {2,10,20,10},
+    // {2,20,20,10},
+    // {2,20,100,50},
+    // {2,30,10,1},
+    // {2,30,100,50},
+    // {2,50,10,1},
+    // {2,50,100,50},
+    // {2,100,100,50},
+    // {3,10,10,1},
+    // {5,10,10,1},
+    // {10,10,10,1},
+    // {3,40,70,30},
+    // {5,40,70,30},
+    // {10,40,70,30},
+    // {30,40,70,30},
 };
 
 void print_vec(const std::vector<int>& vec);
@@ -39,7 +39,7 @@ int main() {
 
 void test_machines(int machines,int tasks, int max_val, int min_val) {
     int common_seed = 1;
-    Problem p(tasks,machines);
+    Problem p(tasks,machines,max_val,min_val);
     std::cout<<"========================================\n";
     std::cout<<"Machines = "<<machines<<"\n";
     std::cout<<"Tasks = "<<tasks<<"\n";
@@ -52,17 +52,17 @@ void test_machines(int machines,int tasks, int max_val, int min_val) {
     p.PZ();
     std::cout<<p.CMax(p.pi)<<";"<<p.pz_time<<";";
 
-    p.fill_test1();
+    p.reload();
     p.NEH();
     std::cout<<p.CMax(p.pi)<<";"<<p.neh_time<<";";
 
     if (machines==2) {
-        p.fill_test1();
+        p.reload();
         p.Johnson();
         std::cout<<p.CMax(p.pi)<<";"<<p.john_time<<";";
     }
 
-    p.fill_test1();
+    p.reload();
     p.FNEH();
     std::cout<<p.CMax(p.pi)<<";"<<p.fneh_time<<";";
 
@@ -74,7 +74,7 @@ void test_machines(int machines,int tasks, int max_val, int min_val) {
 
 void test1() {
     int n=3,m=2;
-    Problem p(n,m);
+    Problem p(n,m,10,1);
 
     std::cout<<"PZ\n";
     p.PZ();

@@ -8,11 +8,13 @@
 #include "Machine.h"
 
 #include <chrono>
+#include <random>
 
 class Problem {
     int n; //liczba zadan
     int m; //procesor
     std::vector<Machine> machines;
+    std::vector<Machine> back_up;
 public:
     double neh_time;
     double fneh_time;
@@ -20,7 +22,9 @@ public:
     double john_time;
     std::vector<int> pi;
 
-    Problem(const int n, const int m);
+    Problem(const int n, const int m, int max_val,int min_val);
+    void fill(int max_val,int min_val);
+    void reload();
     void fill_test1();
     void clear();
     void PZ();

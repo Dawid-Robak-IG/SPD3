@@ -8,16 +8,40 @@
 #include <climits>
 #include <iostream>
 
-Problem::Problem(const int n, const int m) {
+Problem::Problem(const int n, const int m, int max_val,int min_val) {
     this->n = n;
     this->m = m;
-    fill_test1();
+    // fill_test1();
+    fill(max_val,min_val);
+    back_up = machines;
 }
 void Problem::clear() {
     machines.clear();
     machines.resize(m, Machine(n));
     pi.clear();
     pi.resize(n);
+
+}
+void Problem::fill(int max_val,int min_val) {
+    clear();
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(min_val, max_val);
+
+    for (int j = 0; j < m; ++j) {
+        for (int i = 0; i < n; ++i) {
+            machines[j].operations[i] = dis(gen);
+        }
+    }
+}
+void Problem::reload() {
+    clear();
+    machines = back_up;
+}
+void Problem::fill_test1() {
+    clear();
+    machines[0].operations = {3,2,4};
+    machines[1].operations = {2,1,3};
 }
 
 void Problem::PZ() {
@@ -214,12 +238,4 @@ void Problem::FNEH() {
     std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     fneh_time = elapsed_seconds.count();
-}
-
-
-void Problem::fill_test1() {
-    clear();
-    machines[0].operations = {3,2,4};
-    machines[1].operations = {2,1,3};
-
 }
