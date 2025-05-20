@@ -7,11 +7,17 @@
 
 #include "Machine.h"
 
+#include <chrono>
+
 class Problem {
     int n; //liczba zadan
     int m; //procesor
     std::vector<Machine> machines;
 public:
+    double neh_time;
+    double fneh_time;
+    double pz_time;
+    double john_time;
     std::vector<int> pi;
 
     Problem(const int n, const int m);
@@ -24,6 +30,15 @@ public:
     int CMax(const std::vector<int> &perm);
 };
 
+struct Instance {
+    int machines;
+    int tasks;
+    int max_val;
+    int min_val;
+
+    Instance(int m, int t, int maxv, int minv)
+        : machines(m), tasks(t), max_val(maxv), min_val(minv) {}
+};
 
 
 #endif //PROBLEM_H

@@ -21,6 +21,7 @@ void Problem::clear() {
 }
 
 void Problem::PZ() {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
     int best_cMax = INT_MAX;
     std::vector<int> perm;
     perm.resize(n);
@@ -32,8 +33,14 @@ void Problem::PZ() {
             pi = perm;
         }
     } while (std::next_permutation(perm.begin(),perm.end()));
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    pz_time = elapsed_seconds.count();
 }
 void Problem::NEH() {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
+
     std::vector<std::pair<int,int>> job_sum(n);
     for (int i=0;i<n;i++) {
         int total=0;
@@ -63,6 +70,10 @@ void Problem::NEH() {
         my_seq = best_operations;
     }
     pi = my_seq;
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    neh_time = elapsed_seconds.count();
 }
 
 
@@ -86,6 +97,7 @@ int Problem::CMax(const std::vector<int> &perm) {
     return C[curr_n - 1][m - 1];
 }
 void Problem::Johnson() {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
     if (m!=2) {
         std::cout<<"Johnson cannot work for m != 2\n";
         return;
@@ -110,8 +122,12 @@ void Problem::Johnson() {
     pi.insert(pi.end(), left.begin(), left.end());
     pi.insert(pi.end(), right.begin(), right.end());
 
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    john_time = elapsed_seconds.count();
 }
 void Problem::FNEH() {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
     std::vector<std::pair<int,int>> job_sum(n);
     for (int i=0;i<n;i++) {
         int total=0;
@@ -194,6 +210,10 @@ void Problem::FNEH() {
         my_seq = best_seq;
     }
     pi = my_seq;
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    fneh_time = elapsed_seconds.count();
 }
 
 
