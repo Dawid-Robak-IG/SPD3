@@ -20,6 +20,7 @@ public:
     void PZ();
     void NEH();
     void Johnson();
+    void FNEH();
     int CMax(const std::vector<int> &perm);
 };
 

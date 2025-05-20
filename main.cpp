@@ -22,6 +22,21 @@ int main() {
     print_vec(p.pi);
     std::cout<<"===============\n";
 
+    if (m==2) {
+        std::cout<<"JOHNSON\n";
+        p.fill_test1();
+        p.Johnson();
+        std::cout<<p.CMax(p.pi)<<std::endl;
+        print_vec(p.pi);
+        std::cout<<"===============\n";
+    }
+    std::cout<<"FNEH\n";
+    p.fill_test1();
+    p.FNEH();
+    std::cout<<p.CMax(p.pi)<<std::endl;
+    print_vec(p.pi);
+    std::cout<<"===============\n";
+
     std::cout<<"PZ || NEH\n";
     return 0;
 }
