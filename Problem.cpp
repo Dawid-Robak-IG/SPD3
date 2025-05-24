@@ -30,7 +30,7 @@ void Problem::fill(int max_val,int min_val) {
 
     for (int j = 0; j < m; ++j) {
         for (int i = 0; i < n; ++i) {
-            machines[j].operations[i] = dis(gen);
+            machines[j].tasks_durations[i] = dis(gen);
         }
     }
 }
@@ -40,8 +40,8 @@ void Problem::reload() {
 }
 void Problem::fill_test1() {
     clear();
-    machines[0].operations = {3,2,4};
-    machines[1].operations = {2,1,3};
+    machines[0].tasks_durations = {3,2,4};
+    machines[1].tasks_durations = {2,1,3};
 }
 
 void Problem::PZ() {
@@ -69,7 +69,7 @@ void Problem::NEH() {
     for (int i=0;i<n;i++) {
         int total=0;
         for (int j=0;j<m;j++) {
-            total += machines[j].operations[i];
+            total += machines[j].tasks_durations[i];
         }
         job_sum[i] = {i,total};
     }
@@ -107,7 +107,7 @@ int Problem::CMax(const std::vector<int> &perm) {
     for (int i = 0; i < curr_n; i++) {
         int job = perm[i];
         for (int j = 0; j < m; j++) {
-            int time = machines[j].operations[job];
+            int time = machines[j].tasks_durations[job];
             if (i > 0 && j > 0)
                 C[i][j] = std::max(C[i - 1][j], C[i][j - 1]) + time;
             else if (j > 0)
@@ -129,17 +129,17 @@ void Problem::Johnson() {
     std::vector<int> left;
     std::vector<int> right;
     for (int i=0;i<n;i++) {
-        if (machines[0].operations[i] >= machines[1].operations[i]) {
+        if (machines[0].tasks_durations[i] >= machines[1].tasks_durations[i]) {
             right.emplace_back(i);
         } else {
             left.emplace_back(i);
         }
     }
     std::sort(left.begin(), left.end(), [&](auto &a, auto &b) {
-        return machines[0].operations[a] < machines[1].operations[b];
+        return machines[0].tasks_durations[a] < machines[1].tasks_durations[b];
     });
     std::sort(right.begin(), right.end(), [&](auto &a, auto &b) {
-        return machines[0].operations[a] > machines[1].operations[b];
+        return machines[0].tasks_durations[a] > machines[1].tasks_durations[b];
     });
 
     pi.clear();
@@ -156,7 +156,7 @@ void Problem::FNEH() {
     for (int i=0;i<n;i++) {
         int total=0;
         for (int j=0;j<m;j++) {
-            total += machines[j].operations[i];
+            total += machines[j].tasks_durations[i];
         }
         job_sum[i] = {i,total};
     }
@@ -178,7 +178,7 @@ void Problem::FNEH() {
         for (int i = 0; i < size; i++) { //F
             int task = my_seq[i];
             for (int j = 0; j < m; j++) {
-                int t = machines[j].operations[task];
+                int t = machines[j].tasks_durations[task];
                 if (i == 0 && j == 0)
                     F[i][j] = t;
                 else if (i == 0)
@@ -192,7 +192,7 @@ void Problem::FNEH() {
         for (int i = size - 1; i >= 0; i--) { //B
             int task = my_seq[i];
             for (int j = m - 1; j >= 0; j--) {
-                int t = machines[j].operations[task];
+                int t = machines[j].tasks_durations[task];
                 if (i == size - 1 && j == m - 1)
                     B[i][j] = t;
                 else if (i == size - 1)
@@ -215,7 +215,7 @@ void Problem::FNEH() {
                 if (pos>0)b_task = F[pos-1][m_idx];
                 else b_task = 0;
 
-                int t = machines[m_idx].operations[job];
+                int t = machines[m_idx].tasks_durations[job];
 
                 if (m_idx == 0)
                     C[m_idx] = b_task + t;
@@ -238,4 +238,76 @@ void Problem::FNEH() {
     std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     fneh_time = elapsed_seconds.count();
+}
+
+void Problem::BnB() {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
+
+    NEH(); // Calc UB
+    int UB = CMax(pi);
+    //int UB = INT_MAX;
+
+    std::vector<int> allTasks(n);
+    iota(allTasks.begin(), allTasks.end(), 0);  // Fill with 0, 1, ..., n-1
+
+    // Priority queue sorted by increasing lower bound
+    std::priority_queue<Node, std::vector<Node>, CompareNode> Q;
+    Q.emplace(std::vector<int>{}, allTasks, 0, 0);  // Start from empty schedule
+
+    while (!Q.empty()) {
+        Node node = Q.top(); Q.pop();
+
+        // Skip branch
+        if (node.lb >= UB)
+            continue;
+
+        // Check if all tasks are scheduled
+        if (node.remaining.empty()) {
+            int cmax = CMax(node.scheduled);
+            if (cmax < UB) {
+                UB = cmax;
+                pi = node.scheduled;
+            }
+            continue;
+        }
+
+        // Branching
+        for (int i = 0; i < node.remaining.size(); ++i) {
+            std::vector<int> nextScheduled = node.scheduled;
+            std::vector<int> nextRemaining = node.remaining;
+            int job = nextRemaining[i];
+
+            // Move one job from remaining to scheduled
+            nextScheduled.push_back(job);
+            nextRemaining.erase(nextRemaining.begin() + i);
+
+            int cmax = CMax(nextScheduled);
+            int LB = calLB(nextScheduled, nextRemaining);
+
+            if (LB < UB) {
+                Q.emplace(nextScheduled, nextRemaining, LB, cmax);
+            }
+        }
+    }
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    bnb_time = elapsed_seconds.count();
+}
+
+int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &remaining) {
+    int cmax = CMax(scheduled);
+    int minSum = 0;
+
+    for (int j = 0; j < m; ++j) {
+        int minTime = INT_MAX;
+
+        for (int i : remaining) {
+            minTime = std::min(minTime, machines[j].tasks_durations[i]);
+        }
+
+        if (!remaining.empty()) minSum += minTime;
+    }
+
+    return cmax + minSum;  // Lower bound = actual time so far + optimistic estimate
 }

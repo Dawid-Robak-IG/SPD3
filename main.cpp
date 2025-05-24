@@ -49,6 +49,7 @@ void test_machines(int machines,int tasks, int max_val, int min_val) {
     if (machines==2)std::cout<<"PZ || NEH || JOHN || FNEH\n";
     else std::cout<<"PZ || NEH || FNEH\n";
 
+    /*
     p.PZ();
     std::cout<<p.CMax(p.pi)<<";"<<p.pz_time<<";";
 
@@ -65,7 +66,10 @@ void test_machines(int machines,int tasks, int max_val, int min_val) {
     p.reload();
     p.FNEH();
     std::cout<<p.CMax(p.pi)<<";"<<p.fneh_time<<";";
-
+    */
+    p.reload();
+    p.BnB();
+    std::cout<<p.CMax(p.pi)<<";BnB: "<<p.bnb_time<<";";
 
     std::cout<<"\n========================================\n";
 }

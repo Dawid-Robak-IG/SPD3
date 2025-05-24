@@ -10,7 +10,7 @@
 class Machine {
 public:
     int n;
-    std::vector<int> operations;
+    std::vector<int> tasks_durations;
     Machine(int n);
 };
 

@@ -7,5 +7,5 @@
 
 Machine::Machine(const int n) {
     this->n = n;
-    operations.resize(n);
+    tasks_durations.resize(n);
 }
