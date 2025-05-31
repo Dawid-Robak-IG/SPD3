@@ -22,6 +22,7 @@ public:
     double pz_time;
     double john_time;
     double bnb_time;
+    double sa_time;
     std::vector<int> pi;
 
     Problem(const int n, const int m, int max_val,int min_val);
@@ -37,6 +38,9 @@ public:
 
     void BnB();
     int calLB(const std::vector<int> &scheduled, const std::vector<int> &remaining);
+
+    void SimulatedAnnealing(double T0, double T_end, int maxIter);
+    void ChangePerm(std::vector<int>& perm);
 
 };
 

@@ -38,6 +38,7 @@ void Problem::reload() {
     clear();
     machines = back_up;
 }
+
 void Problem::fill_test1() {
     clear();
     machines[0].tasks_durations = {3,2,4};
@@ -62,6 +63,7 @@ void Problem::PZ() {
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     pz_time = elapsed_seconds.count();
 }
+
 void Problem::NEH() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
 
@@ -100,7 +102,6 @@ void Problem::NEH() {
     neh_time = elapsed_seconds.count();
 }
 
-
 int Problem::CMax(const std::vector<int> &perm) {
     int curr_n = perm.size();
     std::vector<std::vector<int>> C(curr_n, std::vector<int>(m, 0));
@@ -120,6 +121,7 @@ int Problem::CMax(const std::vector<int> &perm) {
     }
     return C[curr_n - 1][m - 1];
 }
+
 void Problem::Johnson() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
     if (m!=2) {
@@ -150,6 +152,7 @@ void Problem::Johnson() {
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     john_time = elapsed_seconds.count();
 }
+
 void Problem::FNEH() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
     std::vector<std::pair<int,int>> job_sum(n);
@@ -311,3 +314,50 @@ int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &re
 
     return cmax + minSum;  // Lower bound = actual time so far + optimistic estimate
 }
+
+
+void Problem::SimulatedAnnealing(double T0, double T_end, int maxIter) {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+    NEH();
+    //iota(pi.begin(), pi.end(), 0);
+
+    int bestCost = CMax(pi);
+    double T = T0;
+    double lambda = std::pow(T_end / T0, 1.0 / maxIter);
+
+    for (int iter = 0; iter < maxIter; ++iter) {
+        std::vector<int> neighbor = pi;
+        ChangePerm(neighbor); //mutacja inplace
+
+        int neighborCost = CMax(neighbor);
+        int delta = neighborCost - bestCost;
+
+        if (delta < 0 || dis(gen) < std::exp(-delta / T)) {
+            pi = std::move(neighbor);
+            bestCost = neighborCost;
+        }
+
+        T *= lambda;
+    }
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    sa_time = elapsed_seconds.count();
+}
+
+void Problem::ChangePerm(std::vector<int>& perm) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, n);
+
+    int i = dis(gen);
+    int j = dis(gen);
+    while (j == i) j = dis(gen);
+    std::swap(perm[i], perm[j]);
+}
+

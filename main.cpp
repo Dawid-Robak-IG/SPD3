@@ -1,14 +1,15 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
 
 #include "Problem.h"
 
-const int tests_nr=1;
-Instance instances[tests_nr] = {
+std::vector<Instance> instances = {
     {2,10,10,1}
-    // {2,10,20,10},
-    // {2,20,20,10},
-    // {2,20,100,50},
+    //{2,10,20,10},
+    //{2,20,20,10},
+    //{2,20,100,50},
     // {2,30,10,1},
     // {2,30,100,50},
     // {2,50,10,1},
@@ -25,14 +26,13 @@ Instance instances[tests_nr] = {
 
 void print_vec(const std::vector<int>& vec);
 void test1();
-
 void test_machines(int machines,int tasks, int max_val, int min_val);
+void test_machines_csv(const Instance& inst, const std::string& filename, int rep);
+
 
 int main() {
-    // test_machines(2,3,10,5);
-
-    for (int i=0;i<tests_nr;i++) {
-        test_machines(instances[i].machines,instances[i].tasks,instances[i].max_val,instances[i].min_val);
+    for (int i=0;i<instances.size();i++) {
+        test_machines_csv(instances[i], "results.csv", 3);
     }
     return 0;
 }
@@ -66,15 +66,74 @@ void test_machines(int machines,int tasks, int max_val, int min_val) {
     p.reload();
     p.FNEH();
     std::cout<<p.CMax(p.pi)<<";"<<p.fneh_time<<";";
-    */
+
     p.reload();
     p.BnB();
     std::cout<<p.CMax(p.pi)<<";BnB: "<<p.bnb_time<<";";
+    */
+    p.reload();
+    p.SimulatedAnnealing(1000.0, 0.1, 10000);
+    std::cout<<p.CMax(p.pi)<<";SA: "<<p.sa_time<<";";
 
     std::cout<<"\n========================================\n";
 }
 
+void test_machines_csv(const Instance& inst, const std::string& filename, int rep) {
+    std::ofstream file(filename, std::ios::app); // append mode
+    if (!file.is_open()) {
+        std::cerr << "Could not open file: " << filename << "\n";
+        return;
+    }
 
+    // CSV Header
+    file << "algorithm,machines,tasks,max_val,min_val,cmax,time\n";
+
+    for (int i = 0; i < rep; ++i) {
+        Problem p(inst.tasks, inst.machines, inst.max_val, inst.min_val);
+
+        // PZ
+        p.reload();
+        p.PZ();
+        file << "PZ," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+             << p.CMax(p.pi) << "," << p.pz_time << "\n";
+
+        // NEH
+        p.reload();
+        p.NEH();
+        file << "NEH," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+             << p.CMax(p.pi) << "," << p.neh_time << "\n";
+
+        // JOHNSON (only if 2 machines)
+        if (inst.machines == 2) {
+            p.reload();
+            p.Johnson();
+            file << "JOHN," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+                 << p.CMax(p.pi) << "," << p.john_time << "\n";
+        }
+
+        // FNEH
+        p.reload();
+        p.FNEH();
+        file << "FNEH," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+             << p.CMax(p.pi) << "," << p.fneh_time << "\n";
+
+        // BnB
+        p.reload();
+        p.BnB();
+        file << "BnB," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+             << p.CMax(p.pi) << "," << p.bnb_time << "\n";
+
+        /*
+        // Simulated Annealing
+        p.reload();
+        p.SimulatedAnnealing(1000.0, 0.1, 10000);
+        file << "SA," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+             << p.CMax(p.pi) << "," << p.sa_time << "\n";
+             */
+    }
+
+    file.close();
+}
 
 void test1() {
     int n=3,m=2;
