@@ -23,6 +23,7 @@ public:
     double john_time;
     double bnb_time;
     double sa_time;
+    double ta_time;
     std::vector<int> pi;
 
     Problem(const int n, const int m, int max_val,int min_val);
@@ -42,6 +43,8 @@ public:
     void SimulatedAnnealing(double T0, double T_end, int maxIter);
     void ChangePerm(std::vector<int>& perm);
 
+    void ThresholdAccepting(double T0, double T_end, int steps_per_threshold, int max_outer_iter);
+
 };
 
 struct Instance {
@@ -52,6 +55,15 @@ struct Instance {
 
     Instance(int m, int t, int maxv, int minv)
         : machines(m), tasks(t), max_val(maxv), min_val(minv) {}
+};
+
+struct MetaInstance {
+    double T0;
+    double Tend;
+    int max_iter;
+
+    MetaInstance(double T_0, double T_end, int max_Iter)
+        : T0(T_0), Tend(T_end), max_iter(max_Iter) {}
 };
 
 struct Node {

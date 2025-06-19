@@ -138,10 +138,10 @@ void Problem::Johnson() {
         }
     }
     std::sort(left.begin(), left.end(), [&](auto &a, auto &b) {
-        return machines[0].tasks_durations[a] < machines[1].tasks_durations[b];
+        return machines[0].tasks_durations[a] < machines[0].tasks_durations[b];
     });
     std::sort(right.begin(), right.end(), [&](auto &a, auto &b) {
-        return machines[0].tasks_durations[a] > machines[1].tasks_durations[b];
+        return machines[1].tasks_durations[a] > machines[1].tasks_durations[b];
     });
 
     pi.clear();
@@ -353,11 +353,43 @@ void Problem::SimulatedAnnealing(double T0, double T_end, int maxIter) {
 void Problem::ChangePerm(std::vector<int>& perm) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, n);
+    std::uniform_int_distribution<> dis(0, n - 1);
 
     int i = dis(gen);
     int j = dis(gen);
     while (j == i) j = dis(gen);
     std::swap(perm[i], perm[j]);
 }
+void Problem::ThresholdAccepting(double T0, double T_end, int steps_per_threshold, int max_outer_iter) {
+    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
 
+    NEH();
+    int bestCost = CMax(pi);
+    double T = T0;
+    double threshold = T0;
+    double decay = (T0 - T_end) / max_outer_iter;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    for (int outer = 0; outer < max_outer_iter; ++outer) {
+        for (int inner = 0; inner < steps_per_threshold; ++inner) {
+            std::vector<int> neighbor = pi;
+            ChangePerm(neighbor);
+
+            int neighborCost = CMax(neighbor);
+            int delta = neighborCost - bestCost;
+
+            if (delta <= threshold) {
+                pi = std::move(neighbor);
+                bestCost = neighborCost;
+            }
+        }
+        threshold -= decay;
+        if (threshold < 0) break;
+    }
+
+    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end0 - start0;
+    ta_time = elapsed_seconds.count();
+}
