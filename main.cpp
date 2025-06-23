@@ -108,15 +108,15 @@ void test_taylor() {
         // file << p.CMax(p.pi) << "," << p.fneh_time << ",";
 
         // BnB
-        // if (p.n>12) {
-        //     file << "---,---,";
-        // }
-        // else {
-        //     std::cout<<"Going for BnB \n";
-        //     p.reload();
-        //     p.BnB();
-        //     file <<p.CMax(p.pi) << "," << p.bnb_time << ",";
-        // }
+        if (p.n>12) {
+            file << "---,---,";
+        }
+        else {
+            std::cout<<"Going for BnB \n";
+            p.reload();
+            p.BnB();
+            file <<p.CMax(p.pi) << "," << p.bnb_time << ",";
+        }
 
 
         // Simulated Annealing

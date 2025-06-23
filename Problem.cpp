@@ -284,26 +284,20 @@ void Problem::FNEH() {
 
 void Problem::BnB() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
-
-    NEH(); // Calc UB
+    NEH();
     int UB = CMax(pi);
-    //int UB = INT_MAX;
-
     std::vector<int> allTasks(n);
-    iota(allTasks.begin(), allTasks.end(), 0);  // Fill with 0, 1, ..., n-1
+    iota(allTasks.begin(), allTasks.end(), 0);
 
-    // Priority queue sorted by increasing lower bound
     std::priority_queue<Node, std::vector<Node>, CompareNode> Q;
-    Q.emplace(std::vector<int>{}, allTasks, 0, 0);  // Start from empty schedule
+    Q.emplace(std::vector<int>{}, allTasks, 0, 0);
 
     while (!Q.empty()) {
         Node node = Q.top(); Q.pop();
 
-        // Skip branch
         if (node.lb >= UB)
             continue;
 
-        // Check if all tasks are scheduled
         if (node.remaining.empty()) {
             int cmax = CMax(node.scheduled);
             if (cmax < UB) {
@@ -313,13 +307,11 @@ void Problem::BnB() {
             continue;
         }
 
-        // Branching
         for (int i = 0; i < node.remaining.size(); ++i) {
             std::vector<int> nextScheduled = node.scheduled;
             std::vector<int> nextRemaining = node.remaining;
             int job = nextRemaining[i];
 
-            // Move one job from remaining to scheduled
             nextScheduled.push_back(job);
             nextRemaining.erase(nextRemaining.begin() + i);
 
@@ -388,7 +380,6 @@ void Problem::SimulatedAnnealing(double T0, double T_end, int maxIter) {
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     sa_time = elapsed_seconds.count();
 }
-
 void Problem::ChangePerm(std::vector<int>& perm) {
     std::random_device rd;
     std::mt19937 gen(rd());
