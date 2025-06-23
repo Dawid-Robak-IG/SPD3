@@ -333,17 +333,15 @@ int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &re
     int cmax = CMax(scheduled);
     int minSum = 0;
 
-    for (int j = 0; j < m; ++j) {
+    for (int machine = 0; machine < m; ++machine) {
         int minTime = INT_MAX;
-
-        for (int i : remaining) {
-            minTime = std::min(minTime, tasks[j].tasks_durations[i]);
+        for (int job : remaining) {
+            minTime = std::min(minTime, tasks[job].tasks_durations[machine]);
         }
-
         if (!remaining.empty()) minSum += minTime;
     }
 
-    return cmax + minSum;  // Lower bound = actual time so far + optimistic estimate
+    return cmax + minSum;
 }
 
 
