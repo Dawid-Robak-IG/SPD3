@@ -49,7 +49,10 @@ public:
 
     void ThresholdAccepting(double T0, double T_end, int steps_per_threshold, int max_outer_iter);
 
-
+    int computeCmaxQNEH(const std::vector<int>& sequence_prefix_end_times,
+                              const std::vector<int>& sequence_suffix_start_times,
+                              int job_to_insert,
+                              int k_length);
 };
 
 struct Instance {

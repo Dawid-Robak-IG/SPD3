@@ -102,10 +102,10 @@ void test_taylor() {
         }
 
         // FNEH
-        // std::cout<<"Going for FNEH \n";
-        // p.reload();
-        // p.FNEH();
-        // file << p.CMax(p.pi) << "," << p.fneh_time << ",";
+        std::cout<<"Going for FNEH \n";
+        p.reload();
+        p.FNEH();
+        file << p.CMax(p.pi) << "," << p.fneh_time << ",";
 
         // BnB
         if (p.n>12) {

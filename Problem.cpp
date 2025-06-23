@@ -50,8 +50,8 @@ void Problem::fill_test1() {
 
 }
 void Problem::fill_by_file(int nr_instances) {
-    // std::string filename = "../tail.dat";
-    std::string filename = "../test.dat";
+    std::string filename = "../tail.dat";
+    // std::string filename = "../test.dat";
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Could not open file: " << filename << "\n";
@@ -188,99 +188,118 @@ void Problem::Johnson() {
 }
 
 void Problem::FNEH() {
-    std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
-    std::vector<std::pair<int,int>> job_sum(n);
-    for (int i=0;i<n;i++) {
-        int total=0;
-        for (int j=0;j<m;j++) {
-            total += tasks[j].tasks_durations[i];
+    auto start = std::chrono::steady_clock::now();
+    std::vector<std::pair<int, int>> job_sum(n);
+    for (int i = 0; i < n; ++i) {
+        int sum = 0;
+        for (int j = 0; j < m; ++j) {
+            sum += tasks[i].tasks_durations[j];
         }
-        job_sum[i] = {i,total};
+        job_sum[i] = {i, sum};
     }
-    std::sort(job_sum.begin(), job_sum.end(), [](auto &a, auto &b) {
-        return a.second > b.second;
-    });
+    std::sort(job_sum.begin(), job_sum.end(),
+              [](const auto& a, const auto& b) { return a.second > b.second; });
 
-    std::vector<int> my_seq;
-    std::vector<std::vector<int>> F(n + 1, std::vector<int>(m, 0));
-    std::vector<std::vector<int>> B(n + 1, std::vector<int>(m, 0));
-
-    for (int k = 0; k < n; k++) {
-        int job = job_sum[k].first;
+    std::vector<int> sequence;
+    std::vector<std::vector<int>> C;
+    for (int k = 0; k < n; ++k) {
+        int job_to_insert = job_sum[k].first;
         int best_cmax = INT_MAX;
         std::vector<int> best_seq;
 
-        int current_seq_size = my_seq.size();
-        
-        std::vector<std::vector<int>> current_F(current_seq_size, std::vector<int>(m, 0));
-        std::vector<std::vector<int>> current_B(current_seq_size, std::vector<int>(m, 0));
-
-        // Calculate F for the current my_seq
-        for (int i = 0; i < current_seq_size; i++) {
-            int task = my_seq[i];
-            for (int j = 0; j < m; j++) {
-                int t = tasks[j].tasks_durations[task];
-                if (i == 0 && j == 0)
-                    current_F[i][j] = t;
-                else if (i == 0)
-                    current_F[i][j] = current_F[i][j - 1] + t;
-                else if (j == 0)
-                    current_F[i][j] = current_F[i - 1][j] + t;
-                else
-                    current_F[i][j] = std::max(current_F[i - 1][j], current_F[i][j - 1]) + t;
-            }
-        }
-        // Calculate B for the current my_seq
-        for (int i = current_seq_size - 1; i >= 0; i--) {
-            int task = my_seq[i];
-            for (int j = m - 1; j >= 0; j--) {
-                int t = tasks[j].tasks_durations[task];
-                if (i == current_seq_size - 1 && j == m - 1)
-                    current_B[i][j] = t;
-                else if (j == m - 1)
-                    current_B[i][j] = current_B[i + 1][j] + t;
-                else if (i == current_seq_size - 1)
-                    current_B[i][j] = current_B[i][j + 1] + t;
-                else
-                    current_B[i][j] = std::max(current_B[i + 1][j], current_B[i][j + 1]) + t;
-            }
-        }
-
-        for (int pos = 0; pos <= current_seq_size; pos++) {
-            std::vector<int> temp = my_seq;
-            temp.insert(temp.begin()+pos, job);
-
-            int b_task;
-            std::vector<int> C(m, 0);
-
-            for (int m_idx = 0; m_idx < m; m_idx++) {
-                if (pos > 0) b_task = current_F[pos-1][m_idx]; // Use current_F
-                else b_task = 0;
-
-                int t = tasks[m_idx].tasks_durations[job];
-
-                if (m_idx == 0)
-                    C[m_idx] = b_task + t;
-                else {
-                    C[m_idx] = std::max(b_task, C[m_idx-1]) + t;
+        std::vector<std::vector<int>> F_matrix;
+        if (!sequence.empty()) {
+            F_matrix.resize(sequence.size(), std::vector<int>(m, 0));
+            for (size_t i = 0; i < sequence.size(); ++i) {
+                int job = sequence[i];
+                for (int j = 0; j < m; ++j) {
+                    if (i == 0 && j == 0)
+                        F_matrix[i][j] = tasks[job].tasks_durations[j];
+                    else if (i == 0)
+                        F_matrix[i][j] = F_matrix[i][j - 1] + tasks[job].tasks_durations[j];
+                    else if (j == 0)
+                        F_matrix[i][j] = F_matrix[i - 1][j] + tasks[job].tasks_durations[j];
+                    else
+                        F_matrix[i][j] = std::max(F_matrix[i - 1][j], F_matrix[i][j - 1]) + tasks[job].tasks_durations[j];
                 }
             }
-            int final_cmax = C[m - 1];
-            if (pos < current_seq_size) final_cmax += current_B[pos][m - 1]; // Use current_B
+        }
 
-            if (final_cmax < best_cmax) {
-                best_cmax = final_cmax;
-                best_seq = temp;
+        std::vector<std::vector<int>> B_matrix;
+        if (!sequence.empty()) {
+            B_matrix.resize(sequence.size(), std::vector<int>(m, 0));
+            for (int j = m - 1; j >= 0; --j) {
+                if (j == m - 1)
+                    B_matrix[sequence.size() - 1][j] = tasks[sequence.back()].tasks_durations[j];
+                else
+                    B_matrix[sequence.size() - 1][j] = B_matrix[sequence.size() - 1][j + 1] + tasks[sequence.back()].tasks_durations[j];
+            }
+            for (int i_rev = 1; i_rev < sequence.size(); ++i_rev) {
+                int i = sequence.size() - 1 - i_rev;
+                int job = sequence[i];
+                for (int j = m - 1; j >= 0; --j) {
+                    if (j == m - 1)
+                        B_matrix[i][j] = B_matrix[i + 1][j] + tasks[job].tasks_durations[j];
+                    else
+                        B_matrix[i][j] = std::max(B_matrix[i + 1][j], B_matrix[i][j + 1]) + tasks[job].tasks_durations[j];
+                }
             }
         }
-        my_seq = best_seq;
-    }
-    pi = my_seq;
 
-    std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end0 - start0;
-    fneh_time = elapsed_seconds.count();
+        for (int pos = 0; pos <= sequence.size(); ++pos) {
+            std::vector<int> temp_prefix_end_times(m, 0);
+            std::vector<int> temp_suffix_start_times(m, 0);
+
+            if (pos > 0) {
+                temp_prefix_end_times = F_matrix[pos - 1];
+            }
+            if (pos < sequence.size()) {
+                temp_suffix_start_times = B_matrix[pos];
+            }
+            int cmax = computeCmaxQNEH(temp_prefix_end_times, temp_suffix_start_times, job_to_insert, sequence.size() + 1);
+            if (cmax < best_cmax) {
+                best_cmax = cmax;
+                best_seq = sequence;
+                best_seq.insert(best_seq.begin() + pos, job_to_insert);
+            }
+        }
+        sequence = best_seq;
+    }
+
+    pi = sequence;
+    auto end = std::chrono::steady_clock::now();
+    fneh_time = std::chrono::duration<double>(end - start).count();
 }
+int Problem::computeCmaxQNEH(const std::vector<int>& sequence_prefix_end_times,
+                              const std::vector<int>& sequence_suffix_start_times,
+                              int job_to_insert,
+                              int k_length) {
+    std::vector<int> current_job_start_times(m);
+    std::vector<int> current_job_end_times(m);
+
+    for (int j = 0; j < m; ++j) {
+        int prev_task_end_on_this_machine,current_task_end_on_prev_machine;
+        if (k_length>0) {
+            prev_task_end_on_this_machine = sequence_prefix_end_times[j];
+        } else {
+            prev_task_end_on_this_machine = 0;
+        }
+        if (j>0) {
+            current_task_end_on_prev_machine = current_job_end_times[j - 1];
+        } else {
+            current_task_end_on_prev_machine = 0;
+        }
+
+        current_job_start_times[j] = std::max(prev_task_end_on_this_machine, current_task_end_on_prev_machine);
+        current_job_end_times[j] = current_job_start_times[j] + tasks[job_to_insert].tasks_durations[j];
+    }
+    int cmax = 0;
+    for (int j = 0; j < m; ++j) {
+        cmax = std::max(cmax, current_job_end_times[j] + sequence_suffix_start_times[j]);
+    }
+    return cmax;
+}
+
 
 void Problem::BnB() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
@@ -328,7 +347,6 @@ void Problem::BnB() {
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     bnb_time = elapsed_seconds.count();
 }
-
 int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &remaining) {
     int cmax = CMax(scheduled);
     int minSum = 0;
@@ -343,7 +361,6 @@ int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &re
 
     return cmax + minSum;
 }
-
 
 void Problem::SimulatedAnnealing(double T0, double T_end, int maxIter) {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
