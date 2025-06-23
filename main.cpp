@@ -120,15 +120,15 @@ void test_taylor() {
 
 
         // Simulated Annealing
-        // std::cout<<"Going for sim Annealing \n";
-        // p.reload();
-        // p.SimulatedAnnealing(1000.0, 0.1, 10000);
-        // file << p.CMax(p.pi) << "," << p.sa_time << ",";
+        std::cout<<"Going for sim Annealing \n";
+        p.reload();
+        p.SimulatedAnnealing(1000.0, 0.1, 10000);
+        file << p.CMax(p.pi) << "," << p.sa_time << ",";
 
-        // std::cout<<"Going for threshold accepting \n";
-        // p.reload();
-        // p.ThresholdAccepting(1000.0,0.1,100,10000);
-        // file << p.CMax(p.pi) << "," << p.ta_time << "\n";
+        std::cout<<"Going for threshold accepting \n";
+        p.reload();
+        p.ThresholdAccepting(1000.0,0.1,100,1000);
+        file << p.CMax(p.pi) << "," << p.ta_time << "\n";
     }
     file.close();
     std::cout<<"Closed file\n";

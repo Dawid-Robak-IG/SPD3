@@ -49,7 +49,6 @@ void Problem::fill_test1() {
     tasks[4].tasks_durations = {58, 56, 20, 85, 53, 35, 53, 41, 69, 13, 86, 72, 8, 49, 47, 87, 58, 18, 68, 28};
 
 }
-
 void Problem::fill_by_file(int nr_instances) {
     // std::string filename = "../tail.dat";
     std::string filename = "../test.dat";
@@ -79,7 +78,6 @@ void Problem::fill_by_file(int nr_instances) {
     }
     file.close();
 }
-
 
 void Problem::PZ() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
@@ -394,7 +392,7 @@ void Problem::SimulatedAnnealing(double T0, double T_end, int maxIter) {
 void Problem::ChangePerm(std::vector<int>& perm) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, n - 1);
+    std::uniform_int_distribution<> dis(0, m - 1);
 
     int i = dis(gen);
     int j = dis(gen);
