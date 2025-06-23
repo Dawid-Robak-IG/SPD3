@@ -92,14 +92,14 @@ void test_taylor() {
         file << p.CMax(p.pi) << "," << p.neh_time << ",";
 
         //johnson
-        // if (p.m == 2) {
-        //     std::cout<<"Going for Johnson \n";
-        //     p.reload();
-        //     p.Johnson();
-        //     file << p.CMax(p.pi) << "," << p.john_time << ",";
-        // } else {
-        //     file << "---,---,";
-        // }
+        if (p.m == 2) {
+            std::cout<<"Going for Johnson \n";
+            p.reload();
+            p.Johnson();
+            file << p.CMax(p.pi) << "," << p.john_time << ",";
+        } else {
+            file << "---,---,";
+        }
 
         // FNEH
         // std::cout<<"Going for FNEH \n";

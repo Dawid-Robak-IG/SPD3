@@ -51,7 +51,8 @@ void Problem::fill_test1() {
 }
 
 void Problem::fill_by_file(int nr_instances) {
-    std::string filename = "../tail.dat";
+    // std::string filename = "../tail.dat";
+    std::string filename = "../test.dat";
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Could not open file: " << filename << "\n";
@@ -65,8 +66,8 @@ void Problem::fill_by_file(int nr_instances) {
         file >> this->m;
         clear();
         std::cout << this->n << "(n) | " << this->m << "(m)\n";
-        for (int task_idx=0;task_idx<n;task_idx++) {
-            for (int times=0;times<m;times++) {
+        for (int task_idx=0;task_idx<this->n;task_idx++) {
+            for (int times=0;times<this->m;times++) {
                 int time,idx;
                 file >> idx;
                 file >> time;
@@ -166,17 +167,17 @@ void Problem::Johnson() {
     std::vector<int> left;
     std::vector<int> right;
     for (int i=0;i<n;i++) {
-        if (tasks[0].tasks_durations[i] >= tasks[1].tasks_durations[i]) {
+        if (tasks[i].tasks_durations[0] >= tasks[i].tasks_durations[1]) {
             right.emplace_back(i);
         } else {
             left.emplace_back(i);
         }
     }
     std::sort(left.begin(), left.end(), [&](auto &a, auto &b) {
-        return tasks[0].tasks_durations[a] < tasks[0].tasks_durations[b];
+        return tasks[a].tasks_durations[0] < tasks[b].tasks_durations[0];
     });
     std::sort(right.begin(), right.end(), [&](auto &a, auto &b) {
-        return tasks[1].tasks_durations[a] > tasks[1].tasks_durations[b];
+        return tasks[a].tasks_durations[1] > tasks[b].tasks_durations[1];
     });
 
     pi.clear();
