@@ -5,18 +5,19 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
-#include "Machine.h"
+#include "Task.h"
 
 #include <chrono>
 #include <random>
 #include <queue>
+#include <fstream>
 
 class Problem {
-    int n; //liczba zadan
-    int m; //procesor
-    std::vector<Machine> machines;
-    std::vector<Machine> back_up;
 public:
+    int n; //liczba zadan
+    int m; //ilosc maszyn
+    std::vector<Task> tasks;
+    std::vector<Task> back_up;
     double neh_time;
     double fneh_time;
     double pz_time;
@@ -26,11 +27,14 @@ public:
     double ta_time;
     std::vector<int> pi;
 
-    Problem(const int n, const int m, int max_val,int min_val);
+    Problem(const int n=-1, const int m=-1, int max_val=-1,int min_val=-1);
     void fill(int max_val,int min_val);
     void reload();
     void fill_test1();
     void clear();
+    void fill_by_file(int nr_instances=-1);
+
+
     void PZ();
     void NEH();
     void Johnson();
@@ -45,6 +49,7 @@ public:
 
     void ThresholdAccepting(double T0, double T_end, int steps_per_threshold, int max_outer_iter);
 
+
 };
 
 struct Instance {
@@ -53,8 +58,8 @@ struct Instance {
     int max_val;
     int min_val;
 
-    Instance(int m, int t, int maxv, int minv)
-        : machines(m), tasks(t), max_val(maxv), min_val(minv) {}
+    Instance(int m, int n, int maxv, int minv)
+        : machines(m), tasks(n), max_val(maxv), min_val(minv) {}
 };
 
 struct MetaInstance {

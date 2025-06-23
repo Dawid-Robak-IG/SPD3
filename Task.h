@@ -7,11 +7,11 @@
 
 #include <vector>
 
-class Machine {
+class Task {
 public:
-    int n;
+    int m;
     std::vector<int> tasks_durations;
-    Machine(int n);
+    Task(int m);
 };
 
 

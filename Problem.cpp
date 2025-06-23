@@ -9,18 +9,20 @@
 #include <iostream>
 
 Problem::Problem(const int n, const int m, int max_val,int min_val) {
-    this->n = n;
-    this->m = m;
-    // fill_test1();
-    fill(max_val,min_val);
-    back_up = machines;
+    if (n==-1) {
+        fill_by_file(1);
+    } else {
+        this->n = 3;
+        this->m = 2;
+        fill(max_val,min_val);
+    }
+    back_up = tasks;
 }
 void Problem::clear() {
-    machines.clear();
-    machines.resize(m, Machine(n));
+    tasks.clear();
+    tasks.resize(n, Task(m));
     pi.clear();
     pi.resize(n);
-
 }
 void Problem::fill(int max_val,int min_val) {
     clear();
@@ -30,20 +32,53 @@ void Problem::fill(int max_val,int min_val) {
 
     for (int j = 0; j < m; ++j) {
         for (int i = 0; i < n; ++i) {
-            machines[j].tasks_durations[i] = dis(gen);
+            tasks[j].tasks_durations[i] = dis(gen);
         }
     }
 }
 void Problem::reload() {
     clear();
-    machines = back_up;
+    tasks = back_up;
 }
-
 void Problem::fill_test1() {
     clear();
-    machines[0].tasks_durations = {3,2,4};
-    machines[1].tasks_durations = {2,1,3};
+    tasks[0].tasks_durations = {54, 83, 15, 71, 77, 36, 53, 38, 27, 87, 76, 91, 14, 29, 12, 77, 32, 87, 68, 94};
+    tasks[1].tasks_durations = {79, 3, 11, 99, 56, 70, 99, 60, 5, 56, 3, 61, 73, 75, 47, 14, 21, 86, 5, 77};
+    tasks[2].tasks_durations = {16, 89, 49, 15, 89, 45, 60, 23, 57, 64, 7, 1, 63, 41, 63, 47, 26, 75, 77, 40};
+    tasks[3].tasks_durations = {66, 58, 31, 68, 78, 91, 13, 59, 49, 85, 85, 9, 39, 41, 56, 40, 54, 77, 51, 31};
+    tasks[4].tasks_durations = {58, 56, 20, 85, 53, 35, 53, 41, 69, 13, 86, 72, 8, 49, 47, 87, 58, 18, 68, 28};
+
 }
+
+void Problem::fill_by_file(int nr_instances) {
+    std::string filename = "../tail.dat";
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Could not open file: " << filename << "\n";
+    }
+    int instances;
+    file >> instances;
+    std::cout << instances << "\n";
+    if (nr_instances>0)instances = nr_instances;
+    for (int i = 0; i < instances; ++i) {
+        file >> this->n;
+        file >> this->m;
+        clear();
+        std::cout << this->n << "(n) | " << this->m << "(m)\n";
+        for (int task_idx=0;task_idx<n;task_idx++) {
+            for (int times=0;times<m;times++) {
+                int time,idx;
+                file >> idx;
+                file >> time;
+                tasks[task_idx].tasks_durations[idx] = time;
+                std::cout << idx << " " << tasks[task_idx].tasks_durations[idx] << " | ";
+            }
+            std::cout << "\n";
+        }
+    }
+    file.close();
+}
+
 
 void Problem::PZ() {
     std::chrono::time_point<std::chrono::steady_clock> start0 = std::chrono::steady_clock::now();
@@ -71,7 +106,7 @@ void Problem::NEH() {
     for (int i=0;i<n;i++) {
         int total=0;
         for (int j=0;j<m;j++) {
-            total += machines[j].tasks_durations[i];
+            total += tasks[i].tasks_durations[j];
         }
         job_sum[i] = {i,total};
     }
@@ -108,7 +143,7 @@ int Problem::CMax(const std::vector<int> &perm) {
     for (int i = 0; i < curr_n; i++) {
         int job = perm[i];
         for (int j = 0; j < m; j++) {
-            int time = machines[j].tasks_durations[job];
+            int time = tasks[job].tasks_durations[j];
             if (i > 0 && j > 0)
                 C[i][j] = std::max(C[i - 1][j], C[i][j - 1]) + time;
             else if (j > 0)
@@ -131,17 +166,17 @@ void Problem::Johnson() {
     std::vector<int> left;
     std::vector<int> right;
     for (int i=0;i<n;i++) {
-        if (machines[0].tasks_durations[i] >= machines[1].tasks_durations[i]) {
+        if (tasks[0].tasks_durations[i] >= tasks[1].tasks_durations[i]) {
             right.emplace_back(i);
         } else {
             left.emplace_back(i);
         }
     }
     std::sort(left.begin(), left.end(), [&](auto &a, auto &b) {
-        return machines[0].tasks_durations[a] < machines[0].tasks_durations[b];
+        return tasks[0].tasks_durations[a] < tasks[0].tasks_durations[b];
     });
     std::sort(right.begin(), right.end(), [&](auto &a, auto &b) {
-        return machines[1].tasks_durations[a] > machines[1].tasks_durations[b];
+        return tasks[1].tasks_durations[a] > tasks[1].tasks_durations[b];
     });
 
     pi.clear();
@@ -159,7 +194,7 @@ void Problem::FNEH() {
     for (int i=0;i<n;i++) {
         int total=0;
         for (int j=0;j<m;j++) {
-            total += machines[j].tasks_durations[i];
+            total += tasks[j].tasks_durations[i];
         }
         job_sum[i] = {i,total};
     }
@@ -176,38 +211,43 @@ void Problem::FNEH() {
         int best_cmax = INT_MAX;
         std::vector<int> best_seq;
 
-        int size = my_seq.size();
+        int current_seq_size = my_seq.size();
+        
+        std::vector<std::vector<int>> current_F(current_seq_size, std::vector<int>(m, 0));
+        std::vector<std::vector<int>> current_B(current_seq_size, std::vector<int>(m, 0));
 
-        for (int i = 0; i < size; i++) { //F
+        // Calculate F for the current my_seq
+        for (int i = 0; i < current_seq_size; i++) {
             int task = my_seq[i];
             for (int j = 0; j < m; j++) {
-                int t = machines[j].tasks_durations[task];
+                int t = tasks[j].tasks_durations[task];
                 if (i == 0 && j == 0)
-                    F[i][j] = t;
+                    current_F[i][j] = t;
                 else if (i == 0)
-                    F[i][j] = F[i][j - 1] + t;
+                    current_F[i][j] = current_F[i][j - 1] + t;
                 else if (j == 0)
-                    F[i][j] = F[i - 1][j] + t;
+                    current_F[i][j] = current_F[i - 1][j] + t;
                 else
-                    F[i][j] = std::max(F[i - 1][j], F[i][j - 1]) + t;
+                    current_F[i][j] = std::max(current_F[i - 1][j], current_F[i][j - 1]) + t;
             }
         }
-        for (int i = size - 1; i >= 0; i--) { //B
+        // Calculate B for the current my_seq
+        for (int i = current_seq_size - 1; i >= 0; i--) {
             int task = my_seq[i];
             for (int j = m - 1; j >= 0; j--) {
-                int t = machines[j].tasks_durations[task];
-                if (i == size - 1 && j == m - 1)
-                    B[i][j] = t;
-                else if (i == size - 1)
-                    B[i][j] = B[i][j + 1] + t;
+                int t = tasks[j].tasks_durations[task];
+                if (i == current_seq_size - 1 && j == m - 1)
+                    current_B[i][j] = t;
                 else if (j == m - 1)
-                    B[i][j] = B[i + 1][j] + t;
+                    current_B[i][j] = current_B[i + 1][j] + t;
+                else if (i == current_seq_size - 1)
+                    current_B[i][j] = current_B[i][j + 1] + t;
                 else
-                    B[i][j] = std::max(B[i + 1][j], B[i][j + 1]) + t;
+                    current_B[i][j] = std::max(current_B[i + 1][j], current_B[i][j + 1]) + t;
             }
         }
 
-        for (int pos = 0; pos <= size; pos++) {
+        for (int pos = 0; pos <= current_seq_size; pos++) {
             std::vector<int> temp = my_seq;
             temp.insert(temp.begin()+pos, job);
 
@@ -215,10 +255,10 @@ void Problem::FNEH() {
             std::vector<int> C(m, 0);
 
             for (int m_idx = 0; m_idx < m; m_idx++) {
-                if (pos>0)b_task = F[pos-1][m_idx];
+                if (pos > 0) b_task = current_F[pos-1][m_idx]; // Use current_F
                 else b_task = 0;
 
-                int t = machines[m_idx].tasks_durations[job];
+                int t = tasks[m_idx].tasks_durations[job];
 
                 if (m_idx == 0)
                     C[m_idx] = b_task + t;
@@ -227,7 +267,7 @@ void Problem::FNEH() {
                 }
             }
             int final_cmax = C[m - 1];
-            if (pos < size) final_cmax += B[pos][m - 1];
+            if (pos < current_seq_size) final_cmax += current_B[pos][m - 1]; // Use current_B
 
             if (final_cmax < best_cmax) {
                 best_cmax = final_cmax;
@@ -306,7 +346,7 @@ int Problem::calLB(const std::vector<int> &scheduled, const std::vector<int> &re
         int minTime = INT_MAX;
 
         for (int i : remaining) {
-            minTime = std::min(minTime, machines[j].tasks_durations[i]);
+            minTime = std::min(minTime, tasks[j].tasks_durations[i]);
         }
 
         if (!remaining.empty()) minSum += minTime;
