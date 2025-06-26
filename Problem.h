@@ -12,6 +12,11 @@
 #include <queue>
 #include <fstream>
 
+struct ProblemInstanceData {
+    int n, m;
+    std::vector<std::vector<int>> durations;
+};
+
 class Problem {
 public:
     int n; //liczba zadan
@@ -28,6 +33,7 @@ public:
     std::vector<int> pi;
 
     Problem(const int n=-1, const int m=-1, int max_val=-1,int min_val=-1);
+    Problem(const ProblemInstanceData& data);
     void fill(int max_val,int min_val);
     void reload();
     void fill_test1();
@@ -53,6 +59,8 @@ public:
                               const std::vector<int>& sequence_suffix_start_times,
                               int job_to_insert,
                               int k_length);
+
+    static std::vector<ProblemInstanceData> load_all_instances(std::string filename);
 };
 
 struct Instance {

@@ -18,6 +18,15 @@ Problem::Problem(const int n, const int m, int max_val,int min_val) {
     }
     back_up = tasks;
 }
+Problem::Problem(const ProblemInstanceData& data) {
+    this->n = data.n;
+    this->m = data.m;
+    this->clear();
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < m; ++j)
+            this->tasks[i].tasks_durations[j] = data.durations[i][j];
+    back_up = tasks;
+}
 void Problem::clear() {
     tasks.clear();
     tasks.resize(n, Task(m));
@@ -437,4 +446,32 @@ void Problem::ThresholdAccepting(double T0, double T_end, int steps_per_threshol
     std::chrono::time_point<std::chrono::steady_clock> end0 = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end0 - start0;
     ta_time = elapsed_seconds.count();
+}
+std::vector<ProblemInstanceData> Problem::load_all_instances(std::string filename) {
+    std::vector<ProblemInstanceData> instances;
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Could not open file: " << filename << "\n";
+        return instances;
+    }
+
+    int total_instances;
+    file >> total_instances;
+
+    for (int i = 0; i < total_instances; ++i) {
+        ProblemInstanceData data;
+        file >> data.n >> data.m;
+        data.durations.resize(data.n, std::vector<int>(data.m, 0));
+
+        for (int task = 0; task < data.n; ++task) {
+            for (int mach = 0; mach < data.m; ++mach) {
+                int idx, time;
+                file >> idx >> time;
+                data.durations[task][idx] = time;
+            }
+        }
+        instances.push_back(data);
+    }
+
+    return instances;
 }
