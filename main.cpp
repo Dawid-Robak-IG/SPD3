@@ -6,9 +6,14 @@
 #include "Problem.h"
 
 std::vector<Instance> instances = {
-    {20,5,10,1}
-    // {2,10,10,1},
-    // {2,15,10,1},
+    // {20,5,10,1}
+    {2,10,10,1},
+    {2,15,10,1},
+    {2,50,10,5},
+    {2,100,10,5},
+    {2,200,10,5},
+    {2,300,10,5},
+{2,500,10,5}
     // {3,5,10,1},
     // {3,10,10,1},
     // {3,15,10,1}
@@ -35,6 +40,7 @@ void test_machines_csv(const Instance& inst, const std::string& filename, int re
 void test_meta(const MetaInstance& meta_inst, const std::string& filename, int rep);
 void test_taylor();
 void test_taylor_all();
+void test_johnson(const Instance& inst, const std::string& filename, int rep);
 
 int main() {
     std::string filename = "results.csv";
@@ -45,14 +51,14 @@ int main() {
     file << "PZ, NEH, JOHN, FNEH, BnB, Ann, Thres\n";
     file.close();
     // test_taylor();
-    test_taylor_all();
+    // test_taylor_all();
 
 
 
 
-    // for (int i=0;i<instances.size();i++) {
-    //     test_machines_csv(instances[i], "results.csv", 1);
-    // }
+    for (int i=0;i<instances.size();i++) {
+        test_johnson(instances[i], "results.csv", 1);
+    }
     // for (int i=0;i<meta_instances.size();i++) {
     //     std::cout<<"Going to do "<<i<<std::endl;
     //     test_meta(meta_instances[i], "results.csv", 3);
@@ -62,7 +68,33 @@ int main() {
 
 
 
+void test_johnson(const Instance& inst, const std::string& filename, int rep) {
+    std::ofstream file(filename, std::ios::app); // append mode
+    if (!file.is_open()) {
+        std::cerr << "Could not open file: " << filename << "\n";
+        return;
+    }
+    std::cout<<"Opened file\n";
 
+    for (int i = 0; i < rep; ++i) {
+        std::cout<<"GOING FOR REP\n";
+        Problem p(inst.tasks, inst.machines, inst.max_val, inst.min_val);
+        std::cout<<"created problem\n";
+        file<<p.n<<","<<p.m<<",";
+        if (inst.machines == 2) {
+            std::cout<<"Going for Johnson \n";
+            p.reload();
+            std::cout<<"reloaded\n";
+            p.Johnson();
+            file << p.CMax(p.pi) << "," << p.john_time << ",";
+        } else {
+            file << "---,---,";
+        }
+    }
+    file  << "\n";
+    file.close();
+    std::cout<<"Closed file\n";
+}
 void test_taylor_all() {
     auto instances = Problem::load_all_instances("../tail.dat");
 
@@ -122,8 +154,6 @@ void test_taylor_all() {
 
     file.close();
 }
-
-
 void test_taylor() {
     Problem p;
 
@@ -198,18 +228,6 @@ void test_taylor() {
     file.close();
     std::cout<<"Closed file\n";
 }
-
-
-
-
-
-
-
-
-
-
-
-
 void test_machines_csv(const Instance& inst, const std::string& filename, int rep) {
     std::ofstream file(filename, std::ios::app); // append mode
     if (!file.is_open()) {
@@ -223,68 +241,70 @@ void test_machines_csv(const Instance& inst, const std::string& filename, int re
     for (int i = 0; i < rep; ++i) {
         std::cout<<"GOING FOR REP\n";
         Problem p(inst.tasks, inst.machines, inst.max_val, inst.min_val);
+        file<<p.n<<","<<p.m<<",";
 
         // PZ
-        if (inst.tasks>1) {
-            std::cout<<"NOT GOING FOR PZ\n";
-            file << "---,---,";
-        }
-        else {
-            std::cout<<"Going for PZ \n";
-            p.reload();
-            p.PZ();
-            // file << "PZ," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
-            //      << p.CMax(p.pi) << "," << p.pz_time << "\n";
-            file << p.CMax(p.pi) << "," << p.pz_time << ",";
-        }
+        // if (inst.tasks>1) {
+        //     std::cout<<"NOT GOING FOR PZ\n";
+        //     file << "---,---,";
+        // }
+        // else {
+        //     std::cout<<"Going for PZ \n";
+        //     p.reload();
+        //     p.PZ();
+        //     // file << "PZ," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+        //     //      << p.CMax(p.pi) << "," << p.pz_time << "\n";
+        //     file << p.CMax(p.pi) << "," << p.pz_time << ",";
+        // }
 
         // NEH
-        std::cout<<"Going for NEH \n";
-        p.reload();
-        p.NEH();
-        // file << "NEH," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
-        //      << p.CMax(p.pi) << "," << p.neh_time << "\n";
-        file << p.CMax(p.pi) << "," << p.neh_time << ",";
-
-        // JOHNSON (only if 2 machines)
-        if (inst.machines == 2) {
-            std::cout<<"Going for Johnson \n";
-            p.reload();
-            p.Johnson();
-            file << p.CMax(p.pi) << "," << p.john_time << ",";
-        } else {
-            file << "---,---,";
-        }
+        // std::cout<<"Going for NEH \n";
+        // p.reload();
+        // p.NEH();
+        // // file << "NEH," << inst.machines << "," << inst.tasks << "," << inst.max_val << "," << inst.min_val << ","
+        // //      << p.CMax(p.pi) << "," << p.neh_time << "\n";
+        // file << p.CMax(p.pi) << "," << p.neh_time << ",";
+        //
+        // // JOHNSON (only if 2 machines)
+        // if (inst.machines == 2) {
+        //     std::cout<<"Going for Johnson \n";
+        //     p.reload();
+        //     p.Johnson();
+        //     file << p.CMax(p.pi) << "," << p.john_time << ",";
+        // } else {
+        //     file << "---,---,";
+        // }
 
         // FNEH
-        std::cout<<"Going for FNEH \n";
-        p.reload();
-        p.FNEH();
-        file << p.CMax(p.pi) << "," << p.fneh_time << ",";
+        // std::cout<<"Going for FNEH \n";
+        // p.reload();
+        // p.FNEH();
+        // file << p.CMax(p.pi) << "," << p.fneh_time << ",";
 
         // BnB
-        if (inst.tasks>1) {
-            file << "---,---,";
-        }
-        else {
-            std::cout<<"Going for BnB \n";
-            p.reload();
-            p.BnB();
-            file <<p.CMax(p.pi) << "," << p.bnb_time << ",";
-        }
+        // if (inst.tasks>1) {
+        //     file << "---,---,";
+        // }
+        // else {
+        //     std::cout<<"Going for BnB \n";
+        //     p.reload();
+        //     p.BnB();
+        //     file <<p.CMax(p.pi) << "," << p.bnb_time << ",";
+        // }
 
 
         // Simulated Annealing
-        std::cout<<"Going for sim Annealing \n";
-        p.reload();
-        p.SimulatedAnnealing(1000.0, 0.1, 10000);
-        file << p.CMax(p.pi) << "," << p.sa_time << ",";
+        // std::cout<<"Going for sim Annealing \n";
+        // p.reload();
+        // p.SimulatedAnnealing(1000.0, 0.1, 10000);
+        // file << p.CMax(p.pi) << "," << p.sa_time << ",";
 
         // std::cout<<"Going for threshold accepting \n";
         // p.reload();
         // p.ThresholdAccepting(1000.0,0.1,100,10000);
         // file << p.CMax(p.pi) << "," << p.ta_time << "\n";
     }
+    file  << "\n";
     file.close();
     std::cout<<"Closed file\n";
 }

@@ -5,7 +5,4 @@
 #include "Task.h"
 
 
-Task::Task(const int m) {
-    this->m = m;
-    tasks_durations.resize(m);
-}
+Task::Task(const int m) : m(m), tasks_durations(m, 0) {}

@@ -12,8 +12,8 @@ Problem::Problem(const int n, const int m, int max_val,int min_val) {
     if (n==-1) {
         fill_by_file(1);
     } else {
-        this->n = 3;
-        this->m = 2;
+        this->n = n;
+        this->m = m;
         fill(max_val,min_val);
     }
     back_up = tasks;
@@ -39,8 +39,8 @@ void Problem::fill(int max_val,int min_val) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(min_val, max_val);
 
-    for (int j = 0; j < m; ++j) {
-        for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+        for (int i = 0; i < m; ++i) {
             tasks[j].tasks_durations[i] = dis(gen);
         }
     }
