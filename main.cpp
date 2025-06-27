@@ -51,14 +51,14 @@ int main() {
     file << "PZ, NEH, JOHN, FNEH, BnB, Ann, Thres\n";
     file.close();
     // test_taylor();
-    // test_taylor_all();
+    test_taylor_all();
 
 
 
 
-    for (int i=0;i<instances.size();i++) {
-        test_johnson(instances[i], "results.csv", 1);
-    }
+    // for (int i=0;i<instances.size();i++) {
+    //     test_johnson(instances[i], "results.csv", 1);
+    // }
     // for (int i=0;i<meta_instances.size();i++) {
     //     std::cout<<"Going to do "<<i<<std::endl;
     //     test_meta(meta_instances[i], "results.csv", 3);
@@ -104,52 +104,32 @@ void test_taylor_all() {
         std::cerr << "Could not open file: " << filename << "\n";
         return;
     }
+    int reps = 50;
 
     for (size_t i = 0; i < instances.size(); ++i) {
         Problem p(instances[i]);
 
-        std::cout << "Processing instance " << i+1 << "/" << instances.size()
-                  << " (n=" << p.n << ", m=" << p.m << ")\n";
-        file<<p.n<<","<<p.m<<",";
+        for (int j=0; j<reps; ++j) {
+            std::cout << "Processing instance " << i+1 << "/" << instances.size()
+                      << " (n=" << p.n << ", m=" << p.m << ")\n";
+            file<<p.n<<","<<p.m<<",";
 
-        // if (p.n > 12)
-        //     file << "---,---,";
-        // else {
-        //     p.reload();
-        //     p.PZ();
-        //     file << p.CMax(p.pi) << "," << p.pz_time << ",";
-        // }
+            // p.reload();
+            // p.NEH();
+            // file << p.CMax(p.pi) << "," << p.neh_time << ",";
 
-        p.reload();
-        p.NEH();
-        file << p.CMax(p.pi) << "," << p.neh_time << ",";
+            // p.reload();
+            // p.FNEH();
+            // file << p.CMax(p.pi) << "," << p.fneh_time << ",";
 
-        // if (p.m == 2) {
-        //     p.reload();
-        //     p.Johnson();
-        //     file << p.CMax(p.pi) << "," << p.john_time << ",";
-        // } else
-        //     file << "---,---,";
+            p.reload();
+            p.SimulatedAnnealing(1000.0, 0.1, 10000);
+            file << p.CMax(p.pi) << "," << p.sa_time << ",";
 
-        p.reload();
-        p.FNEH();
-        file << p.CMax(p.pi) << "," << p.fneh_time << ",";
-
-        // if (p.n > 12)
-        //     file << "---,---,";
-        // else {
-        //     p.reload();
-        //     p.BnB();
-        //     file << p.CMax(p.pi) << "," << p.bnb_time << ",";
-        // }
-
-        p.reload();
-        p.SimulatedAnnealing(1000.0, 0.1, 10000);
-        file << p.CMax(p.pi) << "," << p.sa_time << ",";
-
-        p.reload();
-        p.ThresholdAccepting(1000.0, 0.1, 100, 100);
-        file << p.CMax(p.pi) << "," << p.ta_time << "\n";
+            p.reload();
+            p.ThresholdAccepting(1000.0, 0.1, 100, 100);
+            file << p.CMax(p.pi) << "," << p.ta_time << "\n";
+        }
     }
 
     file.close();
